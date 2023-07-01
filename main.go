@@ -1,30 +1,27 @@
 package main
 
 import (
+	"log"
 	"os"
 
+	"github.com/DangPhuongTay/travelblog-golang/database"
+	"github.com/DangPhuongTay/travelblog-golang/routes"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/joho/godotenv"
 )
 
-func getPort() string {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = ":3000"
-	} else {
-		port = ":" + port
-	}
-
-	return port
-}
-
 func main() {
+	database.Connect()
 	app := fiber.New()
+	app.Use(cors.New())
 
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{
-			"message": "Hello, Railway!",
-		})
-	})
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	port := os.Getenv("PORT")
 
-	app.Listen(getPort())
+	routes.Setup(app)
+	app.Listen(":" + port)
 }
